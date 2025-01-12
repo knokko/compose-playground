@@ -7,15 +7,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import java.lang.Thread.sleep
 
 private class TestObject(
     var x: Int = 1,
     var text: String = "hello $x"
 ) {
+}
+
+fun <T: Any> changeState(state: T, change: T.() -> Unit): T {
+    synchronized(state) {
+        change(state)
+        // TODO Also acquire lock while reading
+    }
+    return state
 }
 
 @Composable
@@ -27,17 +32,16 @@ fun App() {
     Thread {
         repeat(50) {
             sleep(1000)
-            test.x += 1
-            test.text = "hm ${test.x}"
-            test = test
-            //test = TestObject(test.x, "hm ${test.x}")
-            //test.update { it.x += 5; it.text = "changed ${it.x}"; TestObject(it.x, it.text) }
+            test = changeState(test) {
+                x += 1
+                text = "hm $x"
+            }
         }
     }.start()
 
     MaterialTheme {
         Button(
-            onClick = { test.text = "whoops ${test.x}"; test = test },
+            onClick = { test = changeState(test) { text = "whoops $x" } },
             modifier = Modifier.testTag("button")
         ) {
             Text(test.text)
