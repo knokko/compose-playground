@@ -9,6 +9,7 @@ plugins {
 repositories {
     mavenCentral()
     google()
+    maven { url = uri("https://jitpack.io")  }
 }
 
 dependencies {
@@ -17,6 +18,8 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
+
+    implementation("com.github.knokko:bitser:36cee7b6a0f6529ddb11b522fbbb889857c19690")
 
     // Include the Test API
     testImplementation(compose.desktop.uiTestJUnit4)
@@ -30,6 +33,11 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "KotlinJvmComposeDesktopApplication"
             packageVersion = "1.0.0"
+        }
+
+        dependencies {
+
+            implementation("com.github.knokko:bitser:36cee7b6a0f6529ddb11b522fbbb889857c19690")
         }
     }
 }
