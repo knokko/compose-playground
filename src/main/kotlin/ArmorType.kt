@@ -10,4 +10,5 @@ class ArmorType(
 	var name: String,
 	var slotType: EquipmentSlotType
 ) {
+	override fun toString() = "ArmorType($key, $name)"
 }

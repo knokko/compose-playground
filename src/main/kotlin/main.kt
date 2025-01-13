@@ -9,15 +9,30 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import java.lang.Thread.sleep
 
 fun <T: Any> changeState(state: T, change: T.() -> Unit): T {
     synchronized(state) {
         change(state)
-        // TODO Also acquire lock while reading
     }
     return state
+}
+
+@Composable
+private fun <T> keepRefreshing(state: T, onChange: (T) -> Unit) {
+    LaunchedEffect(Unit) {
+        try {
+            while (true) {
+                delay(1000)
+                val wasModified = true
+                if (wasModified) onChange(state)
+            }
+        } finally {
+            if (state !is List<*>) println("cancelled state $state")
+        }
+    }
 }
 
 @Composable
@@ -35,14 +50,7 @@ fun composeArmorTypeOverview(armorTypes: MutableList<ArmorType>) = synchronized(
         TextButton(onClick = { state = changeState(state) { add(ArmorType("", "", EquipmentSlotType.Body)) } }) {
             Text("Add armor type")
         }
-        LaunchedEffect(Unit) {
-            while (true) {
-                delay(1000)
-                val wasModified = true
-                if (wasModified) state = state
-                println("Updating list")
-            }
-        }
+        keepRefreshing(state) { state = it }
     }
 }
 
@@ -55,14 +63,7 @@ fun composeArmorTypeRow(armorType: ArmorType) {
         TextField(state.key, { state = changeState(state) { key = it } }, label = { Text("key") })
         TextField(state.name, { state = changeState(state) { name = it } }, label = { Text("name") })
 
-        LaunchedEffect(Unit) {
-            while (true) {
-                val wasModified = true
-                if (wasModified) state = state
-                delay(1000)
-                println("Updating ${state.name}")
-            }
-        }
+        keepRefreshing(state) { state = it }
     }
 }
 
@@ -76,6 +77,13 @@ fun main() = application {
             Text("Inventory")
             Text("Armor types")
             composeArmorTypeOverview(armorTypes)
+        }
+        LaunchedEffect(Unit) {
+            try {
+                while (true) delay(1000)
+            } finally {
+                println("close connection")
+            }
         }
     }
 
