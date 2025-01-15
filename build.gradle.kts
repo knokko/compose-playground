@@ -19,8 +19,6 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
 
-    implementation("com.github.knokko:bitser:36cee7b6a0f6529ddb11b522fbbb889857c19690")
-
     // Include the Test API
     testImplementation(compose.desktop.uiTestJUnit4)
 }
@@ -36,8 +34,7 @@ compose.desktop {
         }
 
         dependencies {
-
-            implementation("com.github.knokko:bitser:36cee7b6a0f6529ddb11b522fbbb889857c19690")
+            implementation("com.github.knokko:bitser:0efc0df00f")
         }
     }
 }
